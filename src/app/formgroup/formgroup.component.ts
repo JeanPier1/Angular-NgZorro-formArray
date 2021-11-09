@@ -19,6 +19,9 @@ export class FormgroupComponent implements OnInit {
   checked: boolean = true;
   answerInterface: Answer = { name: '', correct: '' };
 
+  isVisiblemodel:boolean = false;
+
+
   constructor(private formBuilder: FormBuilder) {
     this.formGroup = this.formBuilder.group({
       questions: this.formBuilder.array([this.createQuestion()]),
@@ -173,7 +176,20 @@ export class FormgroupComponent implements OnInit {
     });
   }
 
-  value1 = 1;
+
+  showModal(): void {
+    this.isVisiblemodel = true;
+  }
+handleOk(): void {
+    console.log('Button ok clicked!');
+    this.isVisiblemodel = false;
+  }
+
+  handleCancel(): void {
+    console.log('Button cancel clicked!');
+    this.isVisiblemodel = false;
+  }
+  
 }
 
 export interface Answer {
