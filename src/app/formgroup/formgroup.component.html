@@ -1,0 +1,356 @@
+<!-- EDICION DE TERMINAR--->
+
+<div nz-row>
+  <div nz-col nzSpan="5">
+    <nz-card
+      *ngFor="let add of questionControls; let i = index"
+      (click)="clickCard(i)"
+    >
+      <h5>{{ add.value.name }}</h5>
+    </nz-card>
+
+    <button nz-button nzType="primary" (click)="addQuestion()">
+      Agregar Pregunta
+    </button>
+    <br />
+    <button nz-button value="Submit" (click)="onSubmit()">Enviar</button>
+  </div>
+  <div nz-col nzSpan="19">
+    <div [formGroup]="formGroup" *ngIf="editQuetion != true">
+      <div
+        formArrayName="questions"
+        *ngFor="let add of questionControls; let i = index"
+      >
+        <div
+          style="padding: 30px"
+          [formGroupName]="i"
+          *ngIf="this.questionControls.length - i === 1"
+        >
+          <div
+            style="
+              padding-top: 20px;
+              padding-bottom: 40px;
+              padding-left: 100px;
+              padding-right: 100px;
+            "
+          >
+            <input
+              nz-input
+              placeholder="¿?"
+              nzSize="large"
+              style="text-align: center; font-size: 30px"
+              formControlName="name"
+            />
+          </div>
+
+          <br />
+          <div nz-row style="padding-left: 100px; padding-right: 100px">
+            <div nz-col nzSpan="8">
+              <p>Nivel</p>
+              <nz-select formControlName="level" ngModel="1">
+                <nz-option nzValue="1" nzLabel="Basico"></nz-option>
+                <nz-option nzValue="2" nzLabel="Moderado"></nz-option>
+                <nz-option nzValue="3" nzLabel="Dificil"></nz-option>
+              </nz-select>
+            </div>
+            <div nz-col nzSpan="8">
+              <p>Puntaje</p>
+              <nz-row>
+                <nz-col nzSpan="12">
+                  <nz-slider
+                    [nzMin]="1"
+                    [nzMax]="20"
+                    [(ngModel)]="
+                      this.questionControls[this.questionControls.length - 1]
+                        .value.point
+                    "
+                    formControlName="point"
+                  ></nz-slider>
+                </nz-col>
+                <div nz-col nzSpan="4">
+                  <nz-input-number
+                    [nzMin]="1"
+                    [nzMax]="20"
+                    [ngStyle]="{ marginLeft: '16px' }"
+                    [(ngModel)]="
+                      this.questionControls[this.questionControls.length - 1]
+                        .value.point
+                    "
+                    formControlName="point"
+                  ></nz-input-number>
+                </div>
+              </nz-row>
+            </div>
+            <div nz-col nzSpan="8">
+              <p>Opcipones de Respuesta</p>
+              <nz-select
+                formControlName="typeanswer"
+                (ngModelChange)="modelSelectTypeAnswer($event)"
+                ngModel="1"
+              >
+                <nz-option nzValue="1" nzLabel="Examen"></nz-option>
+                <nz-option nzValue="2" nzLabel="Verdadero o Falso"></nz-option>
+                <nz-option nzValue="3" nzLabel="Libre"></nz-option>
+              </nz-select>
+            </div>
+          </div>
+          <br />
+          <br />
+          <div style="padding-right: 100px; padding-left: 100px">
+            <div
+              *ngIf="
+                this.questionControls[this.questionControls.length - 1].value
+                  .typeanswer === '1'
+              "
+            >
+              <div nz-row>
+                <div
+                  nz-col
+                  nzSpan="12"
+                  formArrayName="answers"
+                  *ngFor="let item of answerControls(i); let iindex = index"
+                >
+                  <nz-card>
+                    <div nz-row [formGroupName]="iindex">
+                      <div nz-col nzSpan="3">
+                        {{ iindex + 1 }}
+                      </div>
+                      <div nz-col nzSpan="16">
+                        <input nz-input type="text" formControlName="name" />
+                      </div>
+
+                      <div nz-col nzSpan="4">
+                        <label nz-checkbox formControlName="correct"></label>
+                      </div>
+                    </div>
+                  </nz-card>
+                </div>
+              </div>
+            </div>
+            <div
+              *ngIf="
+                this.questionControls[this.questionControls.length - 1].value
+                  .typeanswer === '2'
+              "
+            >
+              <div nz-row>
+                <div
+                  nz-col
+                  nzSpan="12"
+                  formArrayName="answers"
+                  *ngFor="let item of answerControls(i); let iindex = index"
+                >
+                  <nz-card>
+                    <div nz-row [formGroupName]="iindex">
+                      <div nz-col nzSpan="3">
+                        {{ iindex + 1 }}
+                      </div>
+                      <div nz-col nzSpan="16">
+                        <p>
+                          {{ item.get("name")!.value }}
+                        </p>
+                      </div>
+
+                      <div nz-col nzSpan="4">
+                        <nz-radio-group
+                          [(ngModel)]="
+                            this.questionControls[
+                              this.questionControls.length - 1
+                            ].value.validateBoolean
+                          "
+                          (ngModelChange)="onChangeCorrectBoolean($event)"
+                          formControlName="correct"
+                        >
+                          <label nz-radio [nzValue]="iindex"></label>
+                        </nz-radio-group>
+                      </div>
+                    </div>
+                  </nz-card>
+                </div>
+              </div>
+            </div>
+            <div
+              *ngIf="
+                this.questionControls[this.questionControls.length - 1].value
+                  .typeanswer === '3'
+              "
+            >
+              <div nz-row>
+                <div nz-col nzSpan="24">
+                  <nz-card
+                    formArrayName="answers"
+                    *ngFor="let item of answerControls(i); let iindex = index"
+                  >
+                    <div nz-row [formGroupName]="iindex">
+                      <div nz-col nzSpan="3">
+                        {{ iindex + 1 }}
+                      </div>
+                      <div nz-col nzSpan="16">
+                        <input nz-input type="text" formControlName="name" />
+                      </div>
+
+                      <div nz-col nzSpan="6"></div>
+                    </div>
+                  </nz-card>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Pregunta  -->
+
+    <div *ngIf="editQuetion != false">
+      <div [formGroup]="formEditGroup">
+        <div style="padding: 30px">
+          <input
+            nz-input
+            placeholder="¿?"
+            nzSize="large"
+            formControlName="name"
+          />
+          <br />
+          <div nz-row>
+            <div nzSpan="12">
+              <p>Nivel</p>
+              <nz-select formControlName="level" ngModel="1">
+                <nz-option nzValue="1" nzLabel="Basico"></nz-option>
+                <nz-option nzValue="2" nzLabel="Moderado"></nz-option>
+                <nz-option nzValue="3" nzLabel="Dificil"></nz-option>
+              </nz-select>
+            </div>
+            <div nzSpan="12">
+              <p>Puntaje</p>
+              <input
+                nz-input
+                placeholder="0"
+                nzSize="default"
+                formControlName="point"
+              />
+            </div>
+            <div nzSpan="12">
+              <p>Tipo de Respuesta</p>
+              <nz-select
+                formControlName="typeanswer"
+                (ngModelChange)="modelSelectTypeAnswer($event)"
+              >
+                <nz-option nzValue="1" nzLabel="Examen"></nz-option>
+                <nz-option nzValue="2" nzLabel="Verdadero o Falso"></nz-option>
+                <nz-option nzValue="3" nzLabel="Libre"></nz-option>
+              </nz-select>
+            </div>
+          </div>
+          <br />
+          <div
+            *ngIf="
+              this.questionControls[idquestionedit].value.typeanswer === '1'
+            "
+          >
+            <div nz-row>
+              <div
+                nz-col
+                nzSpan="12"
+                formArrayName="answers"
+                *ngFor="
+                  let item of answerControls(idquestionedit);
+                  let iindex = index
+                "
+              >
+                <nz-card>
+                  <div nz-row [formGroupName]="iindex">
+                    <div nz-col nzSpan="3">
+                      {{ iindex + 1 }}
+                    </div>
+                    <div nz-col nzSpan="16">
+                      <input nz-input type="text" formControlName="name" />
+                    </div>
+
+                    <div nz-col nzSpan="4">
+                      <label nz-checkbox formControlName="correct"></label>
+                    </div>
+                  </div>
+                </nz-card>
+              </div>
+            </div>
+          </div>
+          <div
+            *ngIf="
+              this.questionControls[idquestionedit].value.typeanswer === '2'
+            "
+          >
+            <div nz-row>
+              <div
+                nz-col
+                nzSpan="12"
+                formArrayName="answers"
+                *ngFor="
+                  let item of answerControls(idquestionedit);
+                  let iindex = index
+                "
+              >
+                <nz-card>
+                  <div nz-row [formGroupName]="iindex">
+                    <div nz-col nzSpan="3">
+                      {{ iindex + 1 }}
+                    </div>
+                    <div nz-col nzSpan="16">
+                      <p>
+                        {{ item.get("name")!.value }}
+                      </p>
+                    </div>
+
+                    <div nz-col nzSpan="4">
+                      <nz-radio-group
+                        [(ngModel)]="
+                          this.questionControls[idquestionedit].value
+                            .validateBoolean
+                        "
+                        (ngModelChange)="onChangeCorrectBoolean($event)"
+                        formControlName="correct"
+                      >
+                        <label nz-radio [nzValue]="iindex"></label>
+                      </nz-radio-group>
+                    </div>
+                  </div>
+                </nz-card>
+              </div>
+            </div>
+          </div>
+          <div
+            *ngIf="
+              this.questionControls[idquestionedit].value.typeanswer === '3'
+            "
+          >
+            <div nz-row>
+              <div nz-col nzSpan="24">
+                <nz-card
+                  formArrayName="answers"
+                  *ngFor="
+                    let item of answerControls(idquestionedit);
+                    let iindex = index
+                  "
+                >
+                  <div nz-row [formGroupName]="iindex">
+                    <div nz-col nzSpan="3">
+                      {{ iindex + 1 }}
+                    </div>
+                    <div nz-col nzSpan="16">
+                      <input nz-input type="text" formControlName="name" />
+                    </div>
+
+                    <div nz-col nzSpan="6"></div>
+                  </div>
+                </nz-card>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <br />
+    <br />
+    <br />
+  </div>
+</div>
