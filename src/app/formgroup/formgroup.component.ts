@@ -18,6 +18,7 @@ export class FormgroupComponent implements OnInit {
   editQuetion: boolean = false;
   checked: boolean = true;
   answerInterface: Answer = { name: '', correct: '' };
+  questionInterface:QuestionInterface = {id:0,name:'',level:1,point:1,typeanswer:'1', validateBoolean:'' };
 
   isVisiblemodel:boolean = false;
 
@@ -56,15 +57,14 @@ export class FormgroupComponent implements OnInit {
     });
   }
 
-  index: number = 0;
   createQuestion(): FormGroup {
     return this.formBuilder.group({
-      id: [this.index++],
-      name: ['', Validators.required],
-      level: [1, Validators.required],
-      point: [1, Validators.required],
-      typeanswer: [1, Validators.required],
-      validateBoolean: [''],
+      id: [this.questionInterface.id++],
+      name: [this.questionInterface.name, Validators.required],
+      level: [this.questionInterface.level, Validators.required],
+      point: [this.questionInterface.point, Validators.required],
+      typeanswer: [this.questionInterface.typeanswer, Validators.required],
+      validateBoolean: [this.questionInterface.validateBoolean],
       answers: this.formBuilder.array([this.createAnswer()]),
     });
   }
@@ -177,22 +177,37 @@ export class FormgroupComponent implements OnInit {
   }
 
 
+  datamodelTypeAnswer:string = '';
+
+
   showModal(): void {
     this.isVisiblemodel = true;
   }
 handleOk(): void {
-    console.log('Button ok clicked!');
+this.questionInterface.typeanswer = this.datamodelTypeAnswer;
+console.log(this.questionInterface)
+this.addQuestion()
     this.isVisiblemodel = false;
   }
 
   handleCancel(): void {
-    console.log('Button cancel clicked!');
     this.isVisiblemodel = false;
   }
+
+  /* Falta el array de validacion para cocretar todo esto gracias */
+
   
 }
 
 export interface Answer {
   name: string;
   correct: string;
+}
+export interface QuestionInterface{
+  id: number;
+  name: string;
+  level: number;
+  point: number;
+  typeanswer: string;
+  validateBoolean: string;
 }

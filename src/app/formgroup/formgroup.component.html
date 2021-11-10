@@ -163,7 +163,8 @@
               <nz-select
                 formControlName="typeanswer"
                 (ngModelChange)="modelSelectTypeAnswer($event)"
-                ngModel="1"
+                [(ngModel)]="this.questionControls[this.questionControls.length - 1]
+                        .value.typeanswer"
               >
                 <nz-option nzValue="1" nzLabel="Examen"></nz-option>
                 <nz-option nzValue="2" nzLabel="Verdadero o Falso"></nz-option>
@@ -472,12 +473,28 @@
 <nz-modal
   [(nzVisible)]="isVisiblemodel"
   nzTitle="Agregar Pregunta"
+  nzOkText="Agregar"
+  nzCancelText="Cancelar"
   (nzOnCancel)="handleCancel()"
   (nzOnOk)="handleOk()"
 >
   <ng-container *nzModalContent>
-    <p>Content one</p>
-    <p>Content two</p>
-    <p>Content three</p>
+    <div nz-row>
+      <div nz-col nzSpan="8">
+        <nz-radio-group [(ngModel)]="datamodelTypeAnswer">
+          <label nz-radio nzValue="1">Examen</label>
+        </nz-radio-group>
+      </div>
+      <div nz-col nzSpan="8">
+        <nz-radio-group [(ngModel)]="datamodelTypeAnswer">
+          <label nz-radio nzValue="2">Verdadero o falso</label>
+        </nz-radio-group>
+      </div>
+      <div nz-col nzSpan="8">
+        <nz-radio-group [(ngModel)]="datamodelTypeAnswer">
+          <label nz-radio nzValue="3">Libre</label>
+        </nz-radio-group>
+      </div>
+    </div>
   </ng-container>
 </nz-modal>
