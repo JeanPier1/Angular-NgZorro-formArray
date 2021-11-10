@@ -1,213 +1,283 @@
-import { Component, OnInit } from '@angular/core';
-import { FormArray, FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { Component, OnInit } from "@angular/core";
+import { FormArray, FormGroup, FormBuilder, Validators } from "@angular/forms";
 
 @Component({
-  selector: 'app-formgroup',
-  templateUrl: './formgroup.component.html',
-  styleUrls: ['./formgroup.component.css'],
+	selector: "app-formgroup",
+	templateUrl: "./formgroup.component.html",
+	styleUrls: ["./formgroup.component.css"],
 })
 export class FormgroupComponent implements OnInit {
-  form = this.formBuilder.group({
-    lessons: this.formBuilder.array([]),
-  });
+	public formGroup: FormGroup = new FormGroup({});
+	public formEditGroup!: FormGroup;
+	public questions: FormArray = new FormArray([]);
+	public answers: FormArray = new FormArray([]);
+	editQuetion: boolean = false;
+	checked: boolean = true;
+	answerInterface: Answer = { name: "", correct: "" };
+	questionInterface: QuestionInterface = {
+		id: 0,
+		name: "",
+		level: 1,
+		point: 1,
+		typeanswer: "1",
+		validateBoolean: "",
+	};
 
-  public formGroup: FormGroup;
-  public formEditGroup!: FormGroup;
-  public questions: FormArray = new FormArray([]);
-  public answers: FormArray = new FormArray([]);
-  editQuetion: boolean = false;
-  checked: boolean = true;
-  answerInterface: Answer = { name: '', correct: '' };
-  questionInterface:QuestionInterface = {id:0,name:'',level:1,point:1,typeanswer:'1', validateBoolean:'' };
+	isVisiblemodel: boolean = false;
 
-  isVisiblemodel:boolean = false;
+	constructor(private formBuilder: FormBuilder) {}
 
+	ngOnInit() {
+		this.FormGruopQuestion();
+		this.initarray();
+	}
 
-  constructor(private formBuilder: FormBuilder) {
-    this.formGroup = this.formBuilder.group({
-      questions: this.formBuilder.array([this.createQuestion()]),
-    });
-  }
+	FormGruopQuestion() {
+		this.formGroup = this.formBuilder.group({
+			questions: this.formBuilder.array([this.createQuestion()]),
+		});
+	}
 
-  ngOnInit() {}
-  get lessons() {
-    return this.form.controls['lessons'] as any;
-  }
+	/*  ng Question  */
+	GroupQuestion() {
+		this.formGroup = this.formBuilder.group({
+			questions: this.formBuilder.array([this.createQuestion()]),
+		});
+	}
 
-  addLesson() {
-    const lessonForm = this.formBuilder.group({
-      title: ['', Validators.required],
-      level: ['beginner', Validators.required],
-    });
-    this.lessons.push(lessonForm);
-  }
+	createQuestion(): FormGroup {
+		return this.formBuilder.group({
+			id: [this.questionInterface.id++],
+			name: [this.questionInterface.name, Validators.required],
+			level: [this.questionInterface.level, Validators.required],
+			point: [this.questionInterface.point, Validators.required],
+			typeanswer: [this.questionInterface.typeanswer, Validators.required],
+			validateBoolean: [this.questionInterface.validateBoolean],
+			answers: this.formBuilder.array([this.createAnswer()]),
+		});
+	}
 
-  deleteLesson(lessonIndex: number) {
-    this.lessons.removeAt(lessonIndex);
-  }
+	createAnswer(): FormGroup {
+		return this.formBuilder.group({
+			name: [this.answerInterface.name, Validators.required],
+			correct: [this.answerInterface.correct, Validators.required],
+		});
+	}
 
-  confirmation() {
-    console.log(this.form.get('lessons')?.value);
-  }
+	addQuestion() {
+		this.questions = this.formGroup.get("questions") as FormArray;
+		this.questions.push(this.createQuestion());
+		this.editQuetion = false;
+	}
 
-  /*  ng Question  */
-  GroupQuestion() {
-    this.formGroup = this.formBuilder.group({
-      questions: this.formBuilder.array([this.createQuestion()]),
-    });
-  }
+	get questionControls() {
+		return (this.formGroup.get("questions") as FormArray).controls;
+	}
 
-  createQuestion(): FormGroup {
-    return this.formBuilder.group({
-      id: [this.questionInterface.id++],
-      name: [this.questionInterface.name, Validators.required],
-      level: [this.questionInterface.level, Validators.required],
-      point: [this.questionInterface.point, Validators.required],
-      typeanswer: [this.questionInterface.typeanswer, Validators.required],
-      validateBoolean: [this.questionInterface.validateBoolean],
-      answers: this.formBuilder.array([this.createAnswer()]),
-    });
-  }
+	onSubmit() {
+		console.log(this.formGroup.value);
+	}
 
-  createAnswer(): FormGroup {
-    return this.formBuilder.group({
-      name: [this.answerInterface.name, Validators.required],
-      correct: [this.answerInterface.correct, Validators.required],
-    });
-  }
+	okves(data: any) {
+		console.log(data);
+	}
+	addAnswer(id: number): void {
+		this.answers = this.questionControls[id].get("answers") as FormArray;
+		this.answers.push(this.createAnswer());
+	}
 
-  addQuestion() {
-    this.questions = this.formGroup.get('questions') as FormArray;
-    this.questions.push(this.createQuestion());
-    this.editQuetion = false;
-  }
+	answerControls(id: number) {
+		return (this.questionControls[id].get("answers") as FormArray).controls;
+	}
 
-  get questionControls() {
-    return (this.formGroup.get('questions') as FormArray).controls;
-  }
+	idquestionedit: number = 0;
+	clickCard(index: number) {
+		this.idquestionedit = index;
+		let num = this.questionControls.find((x) => x.value.id === index);
+		this.editQuetion = true;
+		this.formEditGroup = num as FormGroup;
+	}
 
-  onSubmit() {
-    console.log(this.formGroup.value);
-  }
+	modelSelectTypeAnswer(e: any) {
+		this.typeAnswerSelect(parseInt(e));
+	}
 
-  okves(data: any) {
-    console.log(data);
-  }
-  addAnswer(id: number): void {
-    this.answers = this.questionControls[id].get('answers') as FormArray;
-    this.answers.push(this.createAnswer());
-  }
+	typeAnswerSelect(id: number) {
+		let itemarray = 0;
+		if (this.editQuetion === true) {
+			itemarray = this.idquestionedit;
+		} else {
+			itemarray = this.questionControls.length - 1;
+		}
+		switch (id) {
+			case 1:
+				this.cleanArrayAnswer();
+				this.answerInterface.correct = "false";
+				this.addAnswer(itemarray);
+				this.addAnswer(itemarray);
+				this.addAnswer(itemarray);
+				this.addAnswer(itemarray);
+				break;
+			case 2:
+				this.cleanArrayAnswer();
+				this.answerInterface.name = "Verdadero";
+				this.addAnswer(itemarray);
+				this.answerInterface.name = "Falso";
+				this.addAnswer(itemarray);
+				break;
+			case 3:
+				this.cleanArrayAnswer();
+				this.addAnswer(itemarray);
+				break;
 
-  answerControls(id: number) {
-    return (this.questionControls[id].get('answers') as FormArray).controls;
-  }
+			default:
+				this.cleanArrayAnswer();
+				this.addAnswer(itemarray);
+				this.addAnswer(itemarray);
+				this.addAnswer(itemarray);
+				this.addAnswer(itemarray);
+				break;
+		}
+	}
 
-  idquestionedit: number = 0;
-  clickCard(index: number) {
-    this.idquestionedit = index;
-    let num = this.questionControls.find((x) => x.value.id === index);
-    this.editQuetion = true;
-    this.formEditGroup = num as FormGroup;
-  }
+	cleanArrayAnswer() {
+		while (
+			(
+				this.questionControls[this.questionControls.length - 1].get(
+					"answers"
+				) as FormArray
+			).length !== 0
+		) {
+			(
+				this.questionControls[this.questionControls.length - 1].get(
+					"answers"
+				) as FormArray
+			).removeAt(0);
+		}
+		this.answerInterface.name = "";
+		this.answerInterface.correct = "";
+	}
 
-  modelSelectTypeAnswer(e: any) {
-    this.typeAnswerSelect(parseInt(e));
-  }
+	onChangeCorrectBoolean(ev: any) {
+		this.questionControls[this.questionControls.length - 1].patchValue({
+			validateBoolean: ev,
+		});
+	}
 
-  typeAnswerSelect(id: number) {
-    let itemarray = 0;
-    if (this.editQuetion === true) {
-      itemarray = this.idquestionedit;
-    } else {
-      itemarray = this.questionControls.length - 1;
-    }
-    switch (id) {
-      case 1:
-        this.cleanArrayAnswer();
-        this.answerInterface.correct = 'false';
-        this.addAnswer(itemarray);
-        this.addAnswer(itemarray);
-        this.addAnswer(itemarray);
-        this.addAnswer(itemarray);
-        break;
-      case 2:
-        this.cleanArrayAnswer();
-        this.answerInterface.name = 'Verdadero';
-        this.addAnswer(itemarray);
-        this.answerInterface.name = 'Falso';
-        this.addAnswer(itemarray);
-        break;
-      case 3:
-        this.cleanArrayAnswer();
-        this.addAnswer(itemarray);
-        break;
+	datamodelTypeAnswer: string = "";
 
-      default:
-        this.cleanArrayAnswer();
-        this.addAnswer(itemarray);
-        this.addAnswer(itemarray);
-        this.addAnswer(itemarray);
-        this.addAnswer(itemarray);
-        break;
-    }
-  }
+	showModal(): void {
+		this.isVisiblemodel = true;
+	}
+	handleOk(): void {
+		this.questionInterface.typeanswer = this.datamodelTypeAnswer;
+		console.log(this.questionInterface);
+		this.addQuestion();
+		this.isVisiblemodel = false;
+	}
 
-  cleanArrayAnswer() {
-    while (
-      (
-        this.questionControls[this.questionControls.length - 1].get(
-          'answers'
-        ) as FormArray
-      ).length !== 0
-    ) {
-      (
-        this.questionControls[this.questionControls.length - 1].get(
-          'answers'
-        ) as FormArray
-      ).removeAt(0);
-    }
-    this.answerInterface.name = '';
-    this.answerInterface.correct = '';
-  }
+	handleCancel(): void {
+		this.isVisiblemodel = false;
+	}
 
-  onChangeCorrectBoolean(ev: any) {
-    this.questionControls[this.questionControls.length - 1].patchValue({
-      validateBoolean: ev,
-    });
-  }
+	/* Falta el array de validacion para cocretar todo esto gracias */
 
+	/* Manito error en la validacion de verdadero y falso ..... Iddequestion */
 
-  datamodelTypeAnswer:string = '';
-
-
-  showModal(): void {
-    this.isVisiblemodel = true;
-  }
-handleOk(): void {
-this.questionInterface.typeanswer = this.datamodelTypeAnswer;
-console.log(this.questionInterface)
-this.addQuestion()
-    this.isVisiblemodel = false;
-  }
-
-  handleCancel(): void {
-    this.isVisiblemodel = false;
-  }
-
-  /* Falta el array de validacion para cocretar todo esto gracias */
-
-  
+	initarray() {
+		(this.formGroup.get("questions") as FormArray).removeAt(0);
+		this.questions12.forEach((question: any, index: number) => {
+			this.questionInterface = {
+				id: question.id,
+				name: question.name,
+				level: question.level,
+				point: question.point,
+				typeanswer: question.typeanswer,
+				validateBoolean: question.validateBoolean,
+			};
+			this.addQuestion();
+			this.cleanArrayAnswer();
+			question.answers.forEach((answer: any) => {
+				this.answerInterface = { name: answer.name, correct: answer.correct };
+				this.addAnswer(index);
+			});
+		});
+	}
+	questions12 = [
+		{
+			id: 0,
+			name: "¿Como se llama esta musica?",
+			level: "1",
+			point: 10,
+			typeanswer: "1",
+			validateBoolean: "",
+			answers: [
+				{
+					name: "C1",
+					correct: true,
+				},
+				{
+					name: "C2",
+					correct: true,
+				},
+				{
+					name: "C3",
+					correct: true,
+				},
+				{
+					name: "C4",
+					correct: "false",
+				},
+			],
+		},
+		{
+			id: 1,
+			name: "¿Como de be estar mu ?",
+			level: "1",
+			point: 10,
+			typeanswer: "2",
+			validateBoolean: 0,
+			answers: [
+				{
+					name: "Verdadero",
+					correct: 0,
+				},
+				{
+					name: "Falso",
+					correct: 0,
+				},
+			],
+		},
+		{
+			id: 2,
+			name: "¿Como de be estar mu bbebebas132?",
+			level: "1",
+			point: 10,
+			typeanswer: "2",
+			validateBoolean: 1,
+			answers: [
+				{
+					name: "Verdadero",
+					correct: 1,
+				},
+				{
+					name: "Falso",
+					correct: 1,
+				},
+			],
+		},
+	];
 }
 
 export interface Answer {
-  name: string;
-  correct: string;
+	name: string;
+	correct: string;
 }
-export interface QuestionInterface{
-  id: number;
-  name: string;
-  level: number;
-  point: number;
-  typeanswer: string;
-  validateBoolean: string;
+export interface QuestionInterface {
+	id: number;
+	name: string;
+	level: number;
+	point: number;
+	typeanswer: string;
+	validateBoolean: string;
 }
